@@ -5,9 +5,9 @@ to process and analyze NYC taxi trip data (yellow and green taxis) for 2019–20
 
 ## Project Structure
 models/
-├── staging/        # Raw data cleaning and renaming
-├── intermediate/   # Joining and unioning models
-└── marts/          # Final fact and dimension tables
+-  staging/        # Raw data cleaning and renaming
+-  intermediate/   # Joining and unioning models
+-  marts/          # Final fact and dimension tables
 
 ## Models
 - `stg_green_tripdata` - Staged green taxi data
