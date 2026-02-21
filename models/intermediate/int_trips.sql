@@ -1,8 +1,17 @@
 -- Enrich and deduplicate trip data
 -- Demonstrates enrichment and surrogate key generation
-
 with unioned as (
-    select * from {{ ref('int_trips_unioned') }}
+    select *
+    from {{ ref('int_trips_unioned') }}
+),
+
+deduped as (
+    select *
+    from unioned
+    qualify row_number() over (
+        partition by vendor_id, pickup_datetime, pickup_location_id, taxi_color
+        order by dropoff_datetime
+    ) = 1
 ),
 
 payment_types as (
@@ -14,7 +23,6 @@ cleaned_and_enriched as (
     select
         -- Surrogate key
         {{ generate_surrogate_key(['u.vendor_id', 'u.pickup_datetime', 'u.pickup_location_id', 'u.taxi_color']) }} as trip_id,
-
         -- Identifiers
         u.vendor_id,
         u.taxi_color,
@@ -48,9 +56,11 @@ cleaned_and_enriched as (
         coalesce(u.payment_type, 0) as payment_type,
         coalesce(pt.description, 'Unknown') as payment_type_description
 
-    from unioned u
+    from deduped u
     left join payment_types pt
         on coalesce(u.payment_type, 0) = pt.payment_type
+
+     
 )
 
 select *
